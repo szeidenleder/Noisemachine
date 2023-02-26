@@ -77,22 +77,19 @@ int noteOffset=0;
 int prevSelectState=0; // did we already select a scale?
 int scale=0; // the chosen scale
 int scaleOffset[11][12]={ // define all scales for scale mode
-	{0,0,0,0,0,0,0,0,0,0,0,0}, // 1. Chromatic (Default)
-	{0,1,2,2,3,4,5,5,6,7,7,8}, // 2. Ionian (Major)
-	{0,1,1,2,3,4,4,5,6,6,7,8}, // 3. Dorian
-	{0,0,1,2,3,3,4,5,5,6,7,8}, // 4. Phrygian
-	{0,1,2,3,3,4,5,5,6,7,8,8}, // 5. Lydian
-	{0,1,2,2,3,4,4,5,6,7,7,8}, // 6. Mixolydian
-	{0,1,1,2,3,3,4,5,6,6,7,8}, // 7. Aeolian (Minor)
-	{0,0,1,2,2,3,4,4,5,6,7,8}, // 8. Locrian
-
-	// 8. Major Penta
-	// 9. Minor Penta
-
+	{0,0,0,0,0,0,0,0,0,0,0,0}, // 0. Chromatic (Default)
+	{0,1,2,2,3,4,5,5,6,7,7,8}, // 1. Ionian (Major)
+	{0,1,1,2,3,4,4,5,6,6,7,8}, // 2. Dorian
+	{0,0,1,2,3,3,4,5,5,6,7,8}, // 3. Phrygian
+	{0,1,2,3,3,4,5,5,6,7,8,8}, // 4. Lydian
+	{0,1,2,2,3,4,4,5,6,7,7,8}, // 5. Mixolydian
+	{0,1,1,2,3,3,4,5,6,6,7,8}, // 6. Aeolian (Minor)
+	{0,0,1,2,2,3,4,4,5,6,7,8}, // 7. Locrian
+  {0,0,1,1,2,3,4,5,5,6,6,7}, // Altered (Super Locrian)
+  {0,1,2,3,4,4,5,5,6,7,8,9}, // Augemented (Lydian augmented)
 	{0,1,1,2,2,2,2,3,3,3,4,4} // 10. Minor with tritone and Maj7
-
-	// 11. Chord Mode - not defined here
 };
+bool chordMode=false;
 
 
 BLECharacteristic *pCharacteristic;
@@ -436,13 +433,20 @@ void SELECTMODE(){
   for (int i = 0; i < button; i++){
     buttonCstate[i] = digitalRead(Buttonselect[i]);
     
+
+    // select scale or chord mode (12)
     if (prevSelectState == 0) {
       digitalWrite(led_Blue, LOW);
       if (buttonCstate[i] == HIGH) { 
-        scale=i; // select scale
+
+        if (i==11) chordMode=true;                  
+        else scale=i; // select scale
         prevSelectState=1;
+        
       }
     }
+
+    // select key (note offset)
     else if (prevSelectState == 1) {
       digitalWrite(led_Blue, HIGH);
       if (buttonCstate[i] == HIGH) { 
