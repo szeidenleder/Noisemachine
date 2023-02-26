@@ -440,7 +440,10 @@ void SELECTMODE(){
       if (buttonCstate[i] == HIGH) { 
 
         if (i==11) chordMode=true;                  
-        else scale=i; // select scale
+        else {
+          scale=i; // select scale
+          chordMode=false;           
+        }
         prevSelectState=1;
         
       }
