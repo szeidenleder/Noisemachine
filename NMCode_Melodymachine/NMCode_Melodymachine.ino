@@ -76,7 +76,7 @@ int lastaverage1 = 0; // average previous state
 int noteOffset=0;
 int prevSelectState=0; // did we already select a scale?
 int scale=0; // the chosen scale
-int scaleOffset[11][12]={ // define all scales for scale mode
+int scaleOffset[10][12]={ // define all scales for scale mode
 	{0,0,0,0,0,0,0,0,0,0,0,0}, // 0. Chromatic (Default)
 	{0,1,2,2,3,4,5,5,6,7,7,8}, // 1. Ionian (Major)
 	{0,1,1,2,3,4,4,5,6,6,7,8}, // 2. Dorian
@@ -85,12 +85,38 @@ int scaleOffset[11][12]={ // define all scales for scale mode
 	{0,1,2,2,3,4,4,5,6,7,7,8}, // 5. Mixolydian
 	{0,1,1,2,3,3,4,5,6,6,7,8}, // 6. Aeolian (Minor)
 	{0,0,1,2,2,3,4,4,5,6,7,8}, // 7. Locrian
-  {0,0,1,1,2,3,4,5,5,6,6,7}, // Altered (Super Locrian)
-  {0,1,2,3,4,4,5,5,6,7,8,9}, // Augemented (Lydian augmented)
-	{0,1,1,2,2,2,2,3,3,3,4,4} // 10. Minor with tritone and Maj7
+  {0,0,1,1,2,3,4,5,5,6,6,7}, // 8. Altered (Super Locrian)
+  //{0,1,2,3,4,4,5,5,6,7,8,9}, // Augemented (Lydian augmented)
+	{0,1,1,2,2,2,2,3,3,3,4,4} // 9. Minor with tritone and Maj7
 };
-bool chordMode=false;
-
+bool chordModeMajor=false;
+bool chordModeMinor=false;
+int *chordNotes[] = { // define all chords for chord mode
+    (int[]){ 0 }, // root note
+    (int[]){ 0,5,7 }, // major chord
+    (int[]){ 0,4,7 }, // minor chord
+    (int[]){ 0,4,6 }, // dim chord
+    (int[]){ 0 }, // sus 2
+    (int[]){ 0 }, // sus 4
+    (int[]){ 0 }, // min 9
+    (int[]){ 0 }, // 1st inversion
+    (int[]){ 0 } // 2nd inversion
+};
+int numberOfChordNotes[] = { //number of notes per chord. Determining Array lenght is a pain in C, so easier to just tell how long the array is.
+1, // root note
+3, // major chord
+3, // minor chord
+3, // dim chord
+4, // sus 2
+4, // sus 4
+4, // min 9
+3, // 1st inversion
+3  // 2nd inversion
+};
+int majorScale[]={1,2,2,1,1,2,3}; // all seven chords of major scale
+int minorScale[]={2,3,1,2,2,1,1}; // same for minor
+int OffNotes[]={0,0,0,0,0}; // C can't do dynamic arrays, thus this has a fixed length of 5, making this the max for chord poliphony
+int numberOfOffNotes=0; // How many notes have been triggered in chord mode? 
 
 BLECharacteristic *pCharacteristic;
 
@@ -439,10 +465,12 @@ void SELECTMODE(){
       digitalWrite(led_Blue, LOW);
       if (buttonCstate[i] == HIGH) { 
 
-        if (i==11) chordMode=true;                  
+        if (i==10) chordModeMajor=true;
+        else if (i==11) chordModeMinor=true;                     
         else {
           scale=i; // select scale
-          chordMode=false;           
+          chordModeMajor=false;    
+          chordModeMinor=false;        
         }
         prevSelectState=1;
         
@@ -462,4 +490,91 @@ void SELECTMODE(){
       }
     }
   }
+}
+
+
+
+
+// Chord Mode by MSz
+
+void CHORDMODE(){
+
+ for (int i = 0; i < button; i++){
+buttonCstate[i] = digitalRead(Buttonselect[i]);
+potCstate = analogRead(potPin);
+outputValue = map(potCstate, 0, 4095, 3, 9);
+ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[scale][i]);
+
+if (outputValue == 3 || outputValue == 5 || outputValue == 7 || outputValue == 9) {
+  digitalWrite(led_Green, HIGH);
+}
+
+else {
+  digitalWrite(led_Green, LOW);
+}
+ 
+ if ((millis() - lastDebounceTime[i]) > debounceDelay) {
+  
+  if (buttonPState[i] != buttonCstate[i]) {
+        lastDebounceTime[i] = millis();
+
+  if (buttonCstate[i] == HIGH) {  
+    if (chordModeMajor=true){
+       if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]], numberOfChordNotes[majorScale[i]]);
+    }
+     if (chordModeMinor=true){
+       if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]], numberOfChordNotes[minorScale[i]]);
+    }
+   
+  }
+
+ else {
+  UNTRIGGERNOTES();
+ }
+buttonPState[i] = buttonCstate[i];
+}
+}
+  }
+}
+
+// Function to trigger notes by MSz
+
+void TRIGGERNOTES(int ButtonNote, int notes[], int numberOfNotes){
+int note;
+
+  for (int i = 0; i < numberOfNotes; i++){
+
+    note = ButtonNote + notes[i];
+    midiPacket[2] = Channel_SelectON;
+    Serial.println(Channel_SelectON); 
+
+    midiPacket[3] = note;
+    Serial.println(midiPacket[3]);
+
+    midiPacket[4] = 100;
+
+    pCharacteristic->setValue(midiPacket, 5);
+
+    pCharacteristic->notify();
+
+    OffNotes[i] = note;
+  } 
+numberOfOffNotes = numberOfNotes;
+}
+
+void UNTRIGGERNOTES(){
+
+  for (int i = 0; i < numberOfOffNotes; i++){
+    midiPacket[2] = Channel_SelectOFF;
+    Serial.println(Channel_SelectOFF);
+
+    midiPacket[3] = OffNotes[i];
+
+    midiPacket[4] = 0;
+
+    pCharacteristic->setValue(midiPacket, 5);
+
+    pCharacteristic->notify();
+  }
+numberOfOffNotes=0;
 }
