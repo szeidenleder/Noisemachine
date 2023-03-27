@@ -304,8 +304,11 @@ void loop(){
 else {
   prevSelectState=0;
   digitalWrite(led_Blue, HIGH);
-  BUTTONS();
-  ROTARY();
+  if (chordModeMajor==true || chordModeMinor==true) CHORDMODE();
+  else {
+    BUTTONS();
+    ROTARY();
+  }
 }
 }
  
