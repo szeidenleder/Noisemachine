@@ -117,6 +117,15 @@ int majorScale[]={1,2,2,1,1,2,3}; // all seven chords of major scale
 int minorScale[]={2,3,1,2,2,1,1}; // same for minor
 int OffNotes[]={0,0,0,0,0}; // C can't do dynamic arrays, thus this has a fixed length of 5, making this the max for chord poliphony
 int numberOfOffNotes=0; // How many notes have been triggered in chord mode? 
+bool modifierActive[] = {
+false, // sus2
+false, // sus4
+false, // min 9
+false, // add13
+false // nochwat
+};
+
+
 
 BLECharacteristic *pCharacteristic;
 
@@ -528,8 +537,10 @@ else {
      if (chordModeMinor=true){
        if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]], numberOfChordNotes[minorScale[i]]);
     }
+    if (i > 6) modifierActive[i-7]=true; //set modifier active if has been pressed
    
   }
+  else if (i > 6)  modifierActive[i-7]=false; //set modifier back to false if not pressed
 
  else {
   UNTRIGGERNOTES();
