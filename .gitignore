@@ -2,3 +2,5 @@
 NMCode_Melodymachine/.DS_Store
 NMCode_Melodymachine/esp32.svd
 .DS_Store
+NMCode_Melodymachine/debug.cfg
+NMCode_Melodymachine/debug_custom.json
