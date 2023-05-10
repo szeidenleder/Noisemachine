@@ -93,25 +93,56 @@ bool chordModeMajor=false;
 bool chordModeMinor=false;
 int *chordNotes[] = { // define all chords for chord mode
     (int[]){ 0 }, // root note
-    (int[]){ 0,5,7 }, // major chord
-    (int[]){ 0,4,7 }, // minor chord
-    (int[]){ 0,4,6 }, // dim chord
-    (int[]){ 0 }, // sus 2
-    (int[]){ 0 }, // sus 4
-    (int[]){ 0 }, // min 9
-    (int[]){ 0 }, // 1st inversion
-    (int[]){ 0 } // 2nd inversion
+    (int[]){ 0,4,7 }, // major chord
+    (int[]){ 0,3,7 }, // minor chord
+    (int[]){ 0,3,6 }, // dim chord
+    // +3 sus2
+    (int[]){ 0,2,7 }, // "major chord" - sus2
+    (int[]){ 0,2,7 }, // "minor chord" - sus2
+    (int[]){ 0,3,6 }, // dim chord
+    // +6 6
+    (int[]){ 0,4,7, 9 }, // major chord - maj7
+    (int[]){ 0,3,7, 9 }, // minor chord -maj7
+    (int[]){ 0,3,6 }, // dim chord
+    // +9 7
+    (int[]){ 0,4,7,10 }, // major chord - 7
+    (int[]){ 0,3,7,10 }, // minor chord - 7
+    (int[]){ 0,3,6 }, // dim chord
+    // +12 maj7
+    (int[]){ 0,4,7, 11 }, // major chord - maj7"minor chord" - sus2
+    (int[]){ 0,3,7, 11 }, // minor chord - maj7
+    (int[]){ 0,3,6 }, // dim chord
+    // +15 sus4
+    (int[]){ 0,5,7 }, // "major chord" - sus4
+    (int[]){ 0,5,7 }, // "minor chord" - sus4
+    (int[]){ 0,3,6 } // dim chord 
 };
 int numberOfChordNotes[] = { //number of notes per chord. Determining Array lenght is a pain in C, so easier to just tell how long the array is.
-1, // root note
-3, // major chord
-3, // minor chord
-3, // dim chord
-4, // sus 2
-4, // sus 4
-4, // min 9
-3, // 1st inversion
-3  // 2nd inversion
+  1, // root note
+
+  3, // major chord
+  3, // minor chord
+  3, // dim chord
+
+  3, // "major chord" - sus2
+  3, // "minor chord" - sus2
+  3, // dim chord
+
+  4, // major chord - maj7
+  4, // minor chord -maj7
+  3, // dim chord
+    
+  4, // major chord - 7
+  4, // minor chord - 7
+  3, // dim chord
+    
+  4, // major chord - maj7
+  4, // minor chord - maj7
+  3, // dim chord
+      
+  4, // "major chord" - sus4
+  4, // "minor chord" - sus4
+  3   // dim chord 
 };
 int majorScale[]={1,2,2,1,1,2,3}; // all seven chords of major scale
 int minorScale[]={2,3,1,2,2,1,1}; // same for minor
@@ -119,10 +150,10 @@ int OffNotes[]={0,0,0,0,0}; // C can't do dynamic arrays, thus this has a fixed 
 int numberOfOffNotes=0; // How many notes have been triggered in chord mode? 
 bool modifierActive[] = {
 false, // sus2
-false, // sus4
-false, // min 9
-false, // add13
-false // nochwat
+false, // 7
+false, // maj7
+false, // 6
+false // sus4
 };
 
 
@@ -511,43 +542,55 @@ void SELECTMODE(){
 
 void CHORDMODE(){
 
- for (int i = 0; i < button; i++){
-buttonCstate[i] = digitalRead(Buttonselect[i]);
-potCstate = analogRead(potPin);
-outputValue = map(potCstate, 0, 4095, 3, 9);
-ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[scale][i]);
+  for (int i = 0; i < button; i++){
+    buttonCstate[i] = digitalRead(Buttonselect[i]);
+    potCstate = analogRead(potPin);
+    outputValue = map(potCstate, 0, 4095, 3, 9);
+    ButtonNote = (outputValue * 12 + i + noteOffset); // + scaleOffset[scale][i]); –> CHECK - Scale offset really needed for chordmode?! - i don't think so. Makes no sense at all
 
-if (outputValue == 3 || outputValue == 5 || outputValue == 7 || outputValue == 9) {
-  digitalWrite(led_Green, HIGH);
-}
+    if (outputValue == 3 || outputValue == 5 || outputValue == 7 || outputValue == 9) {
+      digitalWrite(led_Green, HIGH);
+    }
 
-else {
-  digitalWrite(led_Green, LOW);
-}
- 
- if ((millis() - lastDebounceTime[i]) > debounceDelay) {
-  
-  if (buttonPState[i] != buttonCstate[i]) {
+    else {
+      digitalWrite(led_Green, LOW);
+    }
+    
+    if ((millis() - lastDebounceTime[i]) > debounceDelay) { // CHECK - Still not entirely sure what the debounce delay does here. - together with line 591
+      
+      if (buttonPState[i] != buttonCstate[i]) {
         lastDebounceTime[i] = millis();
 
-  if (buttonCstate[i] == HIGH) {  
-    if (chordModeMajor=true){
-       if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]], numberOfChordNotes[majorScale[i]]);
-    }
-     if (chordModeMinor=true){
-       if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]], numberOfChordNotes[minorScale[i]]);
-    }
-    if (i > 6) modifierActive[i-7]=true; //set modifier active if has been pressed
-   
-  }
-  else if (i > 6)  modifierActive[i-7]=false; //set modifier back to false if not pressed
+        if (buttonCstate[i] == HIGH) {  
+          if (chordModeMajor=true){
+            if (i <= 6 && modifierActive[0]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+3]], numberOfChordNotes[majorScale[i+3]]); // sus 2 mode
+            if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+6]], numberOfChordNotes[majorScale[i+6]]); // sus 7 mode
+            if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+9]], numberOfChordNotes[majorScale[i+9]]); // sus maj7 mode
+            if (i <= 6 && modifierActive[3]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+12]], numberOfChordNotes[majorScale[i+12]]); // sus 6 mode
+            if (i <= 6 && modifierActive[4]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+15]], numberOfChordNotes[majorScale[i+15]]); // sus 4 mode
 
- else {
-  UNTRIGGERNOTES();
- }
-buttonPState[i] = buttonCstate[i];
-}
-}
+            else if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]], numberOfChordNotes[majorScale[i]]); // no modifier 
+          }
+          if (chordModeMinor=true){
+            if (i <= 6 && modifierActive[0]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+3]], numberOfChordNotes[minorScale[i+3]]); // sus 2 mode
+            if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+6]], numberOfChordNotes[minorScale[i+6]]); // sus 7 mode
+            if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+9]], numberOfChordNotes[minorScale[i+9]]); // sus maj7 mode
+            if (i <= 6 && modifierActive[3]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+12]], numberOfChordNotes[minorScale[i+12]]); // sus 6 mode
+            if (i <= 6 && modifierActive[4]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+15]], numberOfChordNotes[minorScale[i+15]]); // sus 4 mode
+            
+            else if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]], numberOfChordNotes[minorScale[i]]); // no modifier
+          }
+          if (i > 6) modifierActive[i-7]=true; //set modifier active if has been pressed
+        
+        }
+        else if (i > 6)  modifierActive[i-7]=false; //set modifier back to false if not pressed
+
+      else {
+        UNTRIGGERNOTES();
+      }
+      buttonPState[i] = buttonCstate[i];
+      }
+    }
   }
 }
 
