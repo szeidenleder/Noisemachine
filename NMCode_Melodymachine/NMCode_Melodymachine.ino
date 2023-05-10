@@ -508,8 +508,14 @@ void SELECTMODE(){
       digitalWrite(led_Blue, LOW);
       if (buttonCstate[i] == HIGH) { 
 
-        if (i==10) chordModeMajor=true;
-        else if (i==11) chordModeMinor=true;                     
+        if (i==10) {
+          chordModeMajor=true;   
+          chordModeMinor=false;        
+        } 
+        else if (i==11) {
+           chordModeMajor=false;  
+           chordModeMinor=true;     
+        }
         else {
           scale=i; // select scale
           chordModeMajor=false;    
@@ -546,7 +552,7 @@ void CHORDMODE(){
     buttonCstate[i] = digitalRead(Buttonselect[i]);
     potCstate = analogRead(potPin);
     outputValue = map(potCstate, 0, 4095, 3, 9);
-    ButtonNote = (outputValue * 12 + i + noteOffset); // + scaleOffset[scale][i]); –> CHECK - Scale offset really needed for chordmode?! - i don't think so. Makes no sense at all
+    // ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[scale][i]); // origal position of this
 
     if (outputValue == 3 || outputValue == 5 || outputValue == 7 || outputValue == 9) {
       digitalWrite(led_Green, HIGH);
@@ -562,7 +568,8 @@ void CHORDMODE(){
         lastDebounceTime[i] = millis();
 
         if (buttonCstate[i] == HIGH) {  
-          if (chordModeMajor=true){
+          if (chordModeMajor==true){
+            ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[1][i]); // scale offsets for major
             if (i <= 6 && modifierActive[0]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+3]], numberOfChordNotes[majorScale[i+3]]); // sus 2 mode
             if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+6]], numberOfChordNotes[majorScale[i+6]]); // sus 7 mode
             if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i+9]], numberOfChordNotes[majorScale[i+9]]); // sus maj7 mode
@@ -571,7 +578,8 @@ void CHORDMODE(){
 
             else if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]], numberOfChordNotes[majorScale[i]]); // no modifier 
           }
-          if (chordModeMinor=true){
+          if (chordModeMinor==true){
+            ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[6][i]); // scale offsets for minor
             if (i <= 6 && modifierActive[0]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+3]], numberOfChordNotes[minorScale[i+3]]); // sus 2 mode
             if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+6]], numberOfChordNotes[minorScale[i+6]]); // sus 7 mode
             if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i+9]], numberOfChordNotes[minorScale[i+9]]); // sus maj7 mode
