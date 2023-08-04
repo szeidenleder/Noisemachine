@@ -109,7 +109,7 @@ int *chordNotes[] = { // define all chords for chord mode
     (int[]){ 0,3,7,10 }, // minor chord - 7
     (int[]){ 0,3,6 }, // dim chord
     // +12 maj7
-    (int[]){ 0,4,7, 11 }, // major chord - maj7"minor chord" - sus2
+    (int[]){ 0,4,7, 11 }, // major chord - maj7
     (int[]){ 0,3,7, 11 }, // minor chord - maj7
     (int[]){ 0,3,6 }, // dim chord
     // +15 sus4
@@ -124,20 +124,20 @@ int numberOfChordNotes[] = { //number of notes per chord. Determining Array leng
   3, // minor chord
   3, // dim chord
 
-  3, // "major chord" - sus2
-  3, // "minor chord" - sus2
+  4, // "major chord" - sus2
+  4, // "minor chord" - sus2
   3, // dim chord
 
-  4, // major chord - maj7
-  4, // minor chord -maj7
+  5, // major chord - maj7
+  5, // minor chord -maj7
   3, // dim chord
     
-  4, // major chord - 7
-  4, // minor chord - 7
+  5, // major chord - 7
+  5, // minor chord - 7
   3, // dim chord
     
-  4, // major chord - maj7
-  4, // minor chord - maj7
+  5, // major chord - maj7
+  5, // minor chord - maj7
   3, // dim chord
       
   4, // "major chord" - sus4
@@ -571,20 +571,20 @@ void CHORDMODE(){
           if (chordModeMajor==true){
             ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[1][i]); // scale offsets for major
             if (i <= 6 && modifierActive[0]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+3], numberOfChordNotes[majorScale[i]+3]); // sus 2 mode
-            if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+6], numberOfChordNotes[majorScale[i]+6]); // sus 7 mode
-            if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+9], numberOfChordNotes[majorScale[i]+9]); // sus maj7 mode
-            if (i <= 6 && modifierActive[3]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+12], numberOfChordNotes[majorScale[i]+12]); // sus 6 mode
-            if (i <= 6 && modifierActive[4]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+15], numberOfChordNotes[majorScale[i]+15]); // sus 4 mode
+            else if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+6], numberOfChordNotes[majorScale[i]+6]); // 7 mode
+            else if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+9], numberOfChordNotes[majorScale[i]+9]); // maj7 mode
+            else if (i <= 6 && modifierActive[3]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+12], numberOfChordNotes[majorScale[i]+12]); // 6 mode
+            else if (i <= 6 && modifierActive[4]==true) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]+15], numberOfChordNotes[majorScale[i]+15]); // sus 4 mode
 
             else if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[majorScale[i]], numberOfChordNotes[majorScale[i]]); // no modifier 
           }
           if (chordModeMinor==true){
             ButtonNote = (outputValue * 12 + i + noteOffset + scaleOffset[6][i]); // scale offsets for minor
             if (i <= 6 && modifierActive[0]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+3], numberOfChordNotes[minorScale[i]+3]); // sus 2 mode
-            if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+6], numberOfChordNotes[minorScale[i]+6]); // sus 7 mode
-            if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+9], numberOfChordNotes[minorScale[i]+9]); // sus maj7 mode
-            if (i <= 6 && modifierActive[3]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+12], numberOfChordNotes[minorScale[i]+12]); // sus 6 mode
-            if (i <= 6 && modifierActive[4]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+15], numberOfChordNotes[minorScale[i]+15]); // sus 4 mode
+            else if (i <= 6 && modifierActive[1]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+6], numberOfChordNotes[minorScale[i]+6]); // 7 mode
+            else if (i <= 6 && modifierActive[2]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+9], numberOfChordNotes[minorScale[i]+9]); //  maj7 mode
+            else if (i <= 6 && modifierActive[3]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+12], numberOfChordNotes[minorScale[i]+12]); // 6 mode
+            else if (i <= 6 && modifierActive[4]==true) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]+15], numberOfChordNotes[minorScale[i]+15]); // sus 4 mode
             
             else if (i <= 6) TRIGGERNOTES(ButtonNote, chordNotes[minorScale[i]], numberOfChordNotes[minorScale[i]]); // no modifier
           }
