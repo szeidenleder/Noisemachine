@@ -5,7 +5,7 @@
 ![Schematic for selecting scale or chord mode](Noise_Machine_Step1.png?raw=true "Step1: Select Scale or Chord Mode")
 Move the slider all the way to the left and select either one of the seven modes or chord mode major or minor. 
 
-![Schematic for selecting key](Noise_Machine_Step3.png?raw=true "Step 2: Select Key")
+![Schematic for selecting key](Noise_Machine_Step2.png?raw=true "Step 2: Select Key")
 Select a key for scale or chord mode. Move the slider back into a middle position. When scale mode is selected Noise Machine will only play the notes that are part of this scale and skip notes that are not part of the scale. This also increases its range beyond one octave.
 
 ![Schematic for using chord mode](Noise_Machine_Chord_Mode.png?raw=true "Play with Chorod Mode - Example for minor")
