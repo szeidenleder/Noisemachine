@@ -1,4 +1,4 @@
-# New Modes for Noise Machine
+# New Features for Noise Machine
  
 ## Scale and Chord Mode
 
